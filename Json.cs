@@ -61,7 +61,7 @@ namespace Simple.Json
                 {
                     Console.WriteLine(key[1]);
                 } else
-                {
+        {
                     json[i + mod + 1] = int.Parse(key[1]);
                 }
 
