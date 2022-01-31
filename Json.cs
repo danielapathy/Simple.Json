@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +9,15 @@ namespace Simple.Json
 {
     public static class Json
     {
-        public static Dictionary<string, string> presets = new Dictionary<string, string>();
+        public static List<object> presets = new List<object>();
+        private static object[] presetsArray;
+        private static Type objType = new object[] { }.GetType();
 
-        public static void AddPresetKey(string name, string value)
+        public static void AddPresetKey(object name, object value)
         {
-            presets.Add(name, value);
+            presets.Add(name);
+            presets.Add(value);
+            presetsArray = presets.ToArray();
         }
 
         public static string Escape(string value)
@@ -61,7 +65,7 @@ namespace Simple.Json
                 {
                     Console.WriteLine(key[1]);
                 } else
-        {
+                {
                     json[i + mod + 1] = int.Parse(key[1]);
                 }
 
@@ -71,25 +75,45 @@ namespace Simple.Json
             return json;
         }
 
-        public static string Get(params object[] values)
+        public static string Construct(object value, int index)
         {
             string json = string.Empty;
-            for(int i = 0; i < values.Length; i++)
+
+            if (value.GetType() == objType)
             {
-                if(values[i].GetType() == new object[] { }.GetType())
+                json += Get(value as object[]);
+            }
+            else
+            {
+                json += Convert(value, index);
+                if (index % 2 == 1)
                 {
-                    json += Get(values[i] as object[]);
-                } else
-                {
-                    json += Convert(values[i], i);
-                    if (i % 2 == 1)
-                    {
-                        json += ",";
-                    }
+                    json += ",";
                 }
             }
 
-            if(json.EndsWith(","))
+            return json;
+        }
+
+        public static string Get(params object[] values)
+        {
+            string json = string.Empty;
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                json += Construct(values[i], i);
+            }
+
+            if(presetsArray != null)
+            {
+                json += ",";
+                for (int i = 0; i < presetsArray.Length; i++)
+                {
+                    json += Construct(presetsArray[i], i);
+                }
+            }
+
+            if (json.EndsWith(","))
             {
                 json = json.Substring(0, json.Length - 1);
             }
